@@ -32,7 +32,7 @@ int main() {
         void *memset(void *s, int c, size_t n);
     */
     memset(&server_addr, 0, sizeof(server_addr));
-    server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    server_addr.sin_addr.s_addr = inet_addr("127.0.0.1"); //如果需要与非本地地址客户端交互，需要用外部ip地址，不能用回环地址
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(8888);
 
@@ -72,6 +72,8 @@ int main() {
         }
 
         printf("server get message from client: %s\n", get_strs);
+        const char* response = "server response message";
+        send(client_fd, response, strlen(response), 0);
     }
 
     //6.关闭套接字
