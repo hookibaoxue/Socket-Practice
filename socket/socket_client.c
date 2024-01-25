@@ -28,20 +28,33 @@ int main() {
     }
 
     printf("connect success.................");
-    char strs[100];
+    char in_strs[100] = {0};
+    char get_strs[100] = {0};
     int write_ret;
     while (1) {
         printf("input your message:\n");
-        fgets(strs, sizeof(strs), stdin);
-        write_ret = write(client_fd, strs, sizeof(strs));
-        if (write_ret < 0) {
-            perror("write failed");
+        memset(&in_strs, 0, sizeof(in_strs));
+        char* response = fgets(in_strs, sizeof(in_strs), stdin);
+        ssize_t bytes_sent = send(client_fd, response, strlen(response), 0);
+        if (bytes_sent < 0) {
+            perror("send failed");
             break;
         }
 
         // 添加个主动退出的指令
-        if (strncmp(strs, "quit", 4) == 0) {
+        if (strncmp(in_strs, "quit", 4) == 0) {
             break;
+        }
+
+        memset(&get_strs, 0, sizeof(get_strs));
+        ssize_t bytes_read = recv(client_fd, get_strs, sizeof(get_strs), 0);
+        if (bytes_read > 0) {
+            printf("client recv message from server: %s\n", get_strs);
+        } else if (bytes_read == 0) {
+            printf("server close\n");
+            break;
+        } else {
+            perror("recv failed");
         }
     }
 
